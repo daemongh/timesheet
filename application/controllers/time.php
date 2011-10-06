@@ -17,9 +17,33 @@ class Time extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see http://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index()
-	{
+	public function index()	{
 		$this->load->view('index');
+	}
+
+	public function login()	{
+		
+		$username = $this->input->post('username');
+		$password = $this->input->post('password');
+
+		// if everything is cool from authentication, 
+		if (true) {
+			$this->dashboard();
+		} else {
+			$this->index();
+		}
+	}
+
+	public function dashboard() {
+		$this->load->view('dashboard');
+	}
+
+	public function forgotPassword() {
+		echo 'not yet implmenented';
+	}
+
+	public function createAccount() {
+		echo 'not yet implemented';
 	}
 }
 
