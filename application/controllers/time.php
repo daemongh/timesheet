@@ -28,7 +28,7 @@ class Time extends CI_Controller {
 
 		// if everything is cool from authentication, 
 		if (true) {
-			$this->dashboard($username);
+			redirect("/time/dashboard/$username");
 		} else {
 			$this->index();
 		}
