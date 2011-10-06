@@ -28,14 +28,16 @@ class Time extends CI_Controller {
 
 		// if everything is cool from authentication, 
 		if (true) {
-			$this->dashboard();
+			$this->dashboard($username);
 		} else {
 			$this->index();
 		}
 	}
 
-	public function dashboard() {
-		$this->load->view('dashboard');
+	public function dashboard($username = '') {
+		$data['user'] = $username;
+
+		$this->load->view('dashboard', $data);
 	}
 
 	public function forgotPassword() {

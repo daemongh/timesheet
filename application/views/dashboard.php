@@ -8,7 +8,7 @@
 <body>
 
 <h1>Timesheet Dashboard</h1>
-
+<h3>Welcome, <?php echo $user; ?></h3>
 
 </body>
 </html>
