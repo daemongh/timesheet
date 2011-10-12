@@ -18,11 +18,13 @@
 <h3>Welcome, <?php echo $user; ?></h3>
 
 <br>
+<form id='projectForm'>
 Week of : <input type="text" name="from" id="fromDate">
 <!--<a href="" id="thisWeek">this week</a>
 <a href="" id="lastWeek">last week</a> --> 
 <!-- <input type="button" name="resetDates" value="Continue" id="continue">-->
 <br><br>
+
 <div id="projects" style="display:none">
 <table id="projectTable">
 	<thead>
@@ -65,19 +67,20 @@ Week of : <input type="text" name="from" id="fromDate">
 
 			<td></td>
 			<?php
-			$value = buildWeek();
+			$value = getDays();
 			foreach($value as $id => $day) {
-				echo "<td>";
-				echo "<select class='time' name='$id'>";
-				foreach ($day as $id => $hour) {
-					echo "<option value='$hour'>$hour</option>";
-				}
-				echo "</select>";
+				echo "<td class='time'>";
+				//echo "<select class='hours' name='$id'>";
+				//foreach ($day as $id => $hour) {
+				//	echo "<option value='$hour'>$hour</option>";
+				//}
+				//echo "</select>";
+				echo "<input type='text' size='5' name='$day' class='hours' value='0'/>";
 				echo "</td>";
 			}
 			?>
 
-			<td id='totalProjectHours'>0 Hours</td>
+			<td class='totalProjectHours' id='totalProjectHours'>0 Hours</td>
 		</tr>
 	</tbody>
 </table>
@@ -88,9 +91,10 @@ Week of : <input type="text" name="from" id="fromDate">
 Notes:<br> <textarea name="notes" rows=10 cols=50></textarea>
 
 <br><br>
-Total hours for the week : XXX
+Total hours for the week : <span id='grandTotal'>0</div>
 <br><br>
-<input type="button" name="submit" value="submit">
+</form>
+<input type="button" name="submit" value="submit" id="submit">
 <input type="button" name="reset" value="reset">
 <Br><br><br>
 
@@ -123,16 +127,17 @@ $(document).ready( function() {
             var saturday = new Date(sunday.getTime());
             saturday.setDate(saturday.getDate() + 6);
 
-			$('#sunday').html(sunday.toString('MM/dd/yy'));
-			$('#monday').html(monday.toString('MM/dd/yy'));
-			$('#tuesday').html(tuesday.toString('MM/dd/yy'));
-			$('#wednesday').html(wednesday.toString('MM/dd/yy'));
-			$('#thursday').html(thursday.toString('MM/dd/yy'));
-			$('#friday').html(friday.toString('MM/dd/yy'));
-			$('#saturday').html(saturday.toString('MM/dd/yy'));
+			$('#sunday').html(sunday.toString('MM/dd'));
+			$('#monday').html(monday.toString('MM/dd'));
+			$('#tuesday').html(tuesday.toString('MM/dd'));
+			$('#wednesday').html(wednesday.toString('MM/dd'));
+			$('#thursday').html(thursday.toString('MM/dd'));
+			$('#friday').html(friday.toString('MM/dd'));
+			$('#saturday').html(saturday.toString('MM/dd'));
 			
 			$('#projects').show();
-			$('.project').clone(true).appendTo('#projectTable').show().removeAttr('hidden').removeClass('project');
+			$('.project').clone(true).appendTo('#projectTable').show().removeAttr('hidden').removeClass('project').attr('id', 1);
+			$('#1 td:last').attr('id', 'totalProjectHours_1');
     	}
 	});
 
@@ -145,27 +150,132 @@ $(document).ready( function() {
 		$('#fromDate').trigger('datepicker');
 		return false;
 	});
+
+	$('.hours').focus(function() {
+		$(this).val('');
+	});
+
+	$('.hours').blur(function() {
+		if ( $(this).val() == '' ) {
+			$(this).val('0');
+		}	
+	});
 	
-	$('.time').change(function() {
+	$('.time').live('change', function() {
 		//total += parseInt($(this).val());
 		var	total = 0;	
+		var grandTotal = 0;
+		var id = $(this).closest('tr').attr('id');
+			
+		$('#'+id+' .hours').each(function() {
 
-		$(this).each(function() {
-			total += parseInt($(this).val());
+			if ($(this).val() != '') {
+
+				hour = Math.round(parseFloat($(this).val()) * 2) * .5;
+				
+				total += parseFloat(hour);
+				$(this).val(hour);
+				
+			}
 		});
 		
 
-		$('.time last:td').html(total + ' Hours');
+		$('#totalProjectHours_'+id).html(total + ' Hours');
+
+		$('.hours').each(function() {
+			
+			if ($(this).val() != '') {
+				totalHour = Math.round(parseFloat($(this).val()).toFixed(1) * 2) * .5;
+				grandTotal += totalHour;	
+
+			}
+		});
+
+		$('#grandTotal').html(grandTotal);
 
 	});
 
 	$('#addProject').click(function() {
 		$('.project').clone(true).appendTo('#projectTable').show().each(function() {
 			$(this).removeAttr('hidden').removeClass('project');	
+			var row = $(this).index();
+			$(this).attr('id', row);
+			$('#'+row+' td').attr('id', row);
+			$('#'+row+' td:last').attr('id', 'totalProjectHours_'+row);
 		});
+
+		
 
 		return false;
 	});
+
+
+	$('.hours').keydown(function(e) {
+		if ((!e.shiftKey && !e.ctrlKey && !e.altKey) && ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) || e.keyCode == 110) {
+		
+		} else if (e.keyCode != 8 && e.keyCode != 46 && e.keyCode != 37 && e.keyCode != 39 && e.keyCode != 9 ) {
+			e.preventDefault();
+		}
+	});		
+
+
+
+	$.fn.serializeObject = function()
+	{
+	    var o = obj = week = {};
+	    var resourceRecords = [];
+
+	    $.each(this.serializeArray(), function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[[this.name]] = [o[this.name]];
+	            }
+	            o[[this.name]].push(this.value || '');
+	        } else {
+	            o[[this.name]] = this.value || '';
+	        }
+	    	
+	    });
+		
+		for(var x = 1; x<o.project.length; x++) {
+			
+			week = {
+				'weekOf' : o.from, // Date.today().last().saturday().toString('MM/dd/yyyy');
+				'notes' : o.notes,
+				'perProject' : {
+					'project' : o.project[x],
+					'category' : o.sub[x],
+					'sunday' : o.sunday[x],
+					'monday' : o.monday[x],
+					'tuesday' : o.tuesday[x],
+					'wednesday' : o.wednesday[x],
+					'thursday' : o.thursday[x],
+					'friday' : o.friday[x],
+					'saturday' : o.saturday[x],
+					'time' : parseFloat(o.monday[x]) 
+						+ parseFloat(o.tuesday[x]) 
+						+ parseFloat(o.wednesday[x]) 
+						+ parseFloat(o.thursday[x]) 
+						+ parseFloat(o.friday[x]) 
+						+ parseFloat(o.saturday[x]) 
+						+ parseFloat(o.sunday[x]),
+				}
+
+			};
+
+			var tempTime = parseFloat(o.tuesday[x]) + parseFloat(o.monday[x])
+			resourceRecords.push(week);
+		}
+
+		return resourceRecords;	
+	};
+	
+	$('#submit').click(function() {
+		var results = $('#projectForm').serializeObject();
+		console.log(results);
+		return false;
+	});
+
 });
 </script>
 
@@ -175,18 +285,11 @@ $(document).ready( function() {
 </html>
 
 <?php
-
-// this should be moved to a helper
 function getHours() {
-for ($x = 0; $x < 13; $x++) {
-	$time[] =  $x;
+	for ($x = 0; $x < 13; $x++) {
+		$hours[$x] = $x;
+	}
 }
-
-
-
-return $time;
-}
-
 
 function getDays() {
 	return array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');	
@@ -194,7 +297,6 @@ function getDays() {
 
 function buildWeek() {
 	$days = getDays();
-	$hours = getHours();
 	$week = array();
 	foreach($days as $id => $day) {
 		foreach ($hours as $hId => $hour) {
