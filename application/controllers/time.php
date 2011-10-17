@@ -35,7 +35,18 @@ class Time extends CI_Controller {
 	}
 
 	public function dashboard($username = '') {
-		$data['user'] = $username;
+
+        $this->load->model('projectmodel');
+        $projects = $this->projectmodel->findProjects();
+        $categories = $this->projectmodel->findCategories();
+
+        $data = array(
+            'userId' => 1111,
+            'username' => $username,
+            'projects' => $projects,
+            'categories' => $categories
+        );
+
 
 		$this->load->view('dashboard', $data);
 	}
@@ -44,9 +55,45 @@ class Time extends CI_Controller {
 		echo 'not yet implmenented';
 	}
 
-	public function createAccount() {
-		echo 'not yet implemented';
-	}
+    public function updateHours() {
+       
+        $totalHours = 0;
+        $hours = $this->input->post('week');
+
+        // find week
+        error_reporting(0);
+        foreach ($hours as $hour) {
+            $week = date('W', strtotime($hour['weekOf']));
+            $day = array (
+
+                '0' => $hour['sunday'],
+                '1' => $hour['monday'],
+                '2' => $hour['tuesday'],
+                '3' => $hour['wednesday'],
+                '4' => $hour['thursday'],
+                '5' => $hour['friday'],
+                '6' => $hour['saturday']
+            );
+            $project = $hour['project'];
+            $category = $hour['category'];
+        
+
+            try {
+                $this->load->model('projectmodel');
+                $this->projectmodel->updateUserHours($week, $day, $project, $category);
+            } catch (Exception $e) {
+                echo 'error';
+            }       
+        }
+ 
+        $resultArray = array ('success' => true);
+        echo json_encode($resultArray);
+        return true;
+    }
+
+    public function createAccount() {
+        $this->load->view('createAccount');
+    }
 }
 
 /* End of file welcome.php */

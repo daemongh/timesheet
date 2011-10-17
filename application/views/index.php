@@ -16,8 +16,7 @@
 	<input type="password" name="password">
 
 	<input type="submit" name="login" value="Log In">
-	<a href="">Forgot Password?</a>
-	<a href="">Create Account!</a>
+	<a href="<?php echo site_url('/time/createAccount') ?>">Create Account!</a>
 
 </form>
 

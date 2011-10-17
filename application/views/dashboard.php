@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
 <body>
 
 <h1>Timesheet Dashboard</h1>
-<h3>Welcome, <?php echo $user; ?></h3>
+<div class='title'>Welcome, <?php echo $username; ?></div>
 
 <br>
 <form id='projectForm'>
@@ -48,19 +49,24 @@ Week of : <input type="text" name="from" id="fromDate">
 		<tr class="project" style='display:none'>
 			<td>
 				<select name='project'>
+                    <option value=''>-- Select --</option>
 
-					<option value='one'>Project 1</option>
-					<option value='two'>Project 2</option>
-					<option value='three'>Project 3</option>
+                <?php
+                foreach ($projects as $project) {
+                    echo "<option value={$project->id}>{$project->project_name}</option>";
 
+                }
+                ?>
 				</select>
 			</td>
 			<td>
-				<select name='sub'> 
-
-					<option value='sub1'>Sub Project 1</option> 
-					<option value='sub2'>Sub Project 2</option> 
-					<option value='sub3'>Sub Project 3</option>
+				<select name='category'> 
+                    <option value=''>-- Select --</option>
+                <?php
+                foreach ($categories as $category) {
+                    echo "<option value={$category->id}>{$category->category}</option>";
+                }
+                ?>
  
 				</select>
 			</td>
@@ -70,11 +76,6 @@ Week of : <input type="text" name="from" id="fromDate">
 			$value = getDays();
 			foreach($value as $id => $day) {
 				echo "<td class='time'>";
-				//echo "<select class='hours' name='$id'>";
-				//foreach ($day as $id => $hour) {
-				//	echo "<option value='$hour'>$hour</option>";
-				//}
-				//echo "</select>";
 				echo "<input type='text' size='5' name='$day' class='hours' value='0'/>";
 				echo "</td>";
 			}
@@ -91,7 +92,7 @@ Week of : <input type="text" name="from" id="fromDate">
 Notes:<br> <textarea name="notes" rows=10 cols=50></textarea>
 
 <br><br>
-Total hours for the week : <span id='grandTotal'>0</div>
+Total hours for the week : <span id='grandTotal'>0</span>
 <br><br>
 </form>
 <input type="button" name="submit" value="submit" id="submit">
@@ -242,9 +243,8 @@ $(document).ready( function() {
 			week = {
 				'weekOf' : o.from, // Date.today().last().saturday().toString('MM/dd/yyyy');
 				'notes' : o.notes,
-				'perProject' : {
 					'project' : o.project[x],
-					'category' : o.sub[x],
+					'category' : o.category[x],
 					'sunday' : o.sunday[x],
 					'monday' : o.monday[x],
 					'tuesday' : o.tuesday[x],
@@ -259,7 +259,6 @@ $(document).ready( function() {
 						+ parseFloat(o.friday[x]) 
 						+ parseFloat(o.saturday[x]) 
 						+ parseFloat(o.sunday[x]),
-				}
 
 			};
 
@@ -272,7 +271,30 @@ $(document).ready( function() {
 	
 	$('#submit').click(function() {
 		var results = $('#projectForm').serializeObject();
-		console.log(results);
+        //var week = [];
+        //week.push(results);
+
+        var paramMap = {
+            'week' : results,
+            'update' : 1
+        };
+
+        console.log(week);
+
+        $.ajax({
+            url: "<?php echo site_url('/time/updateHours') ?>",
+            type: "POST",
+            data: paramMap,
+            datatype: 'json',
+            success: function(msg) {
+                alert(msg);
+            },
+            error: function(xhr, text, error) {
+                alert('error');
+            }
+
+        });
+        
 		return false;
 	});
 
